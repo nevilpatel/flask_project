@@ -11,8 +11,18 @@
             <p>Thermos is simple bookmarking site.</p>
         </header>
         <section>
-            <h2>{{ title }}</h2>
-            <p>{{ text }}</p>
+            <h2> Recently Added</h2>
+            {% if newbookmarks %}
+                <ul>
+                    {% for bm in newbookmarks %}
+                        <li>
+                            {{ bm.user }} added <a href="{{ bm.url }}">{{ bm.url }}</a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                No bookmarks yet.
+            {% endif %}
         </section>
         <section>
             <h2>article section h2</h2>
