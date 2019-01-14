@@ -14,13 +14,13 @@ pipeline {
                 echo 'Deploying to Stage'
             }
         }
-        stage('Testing') {
+        stage('Parallel Testing') {
             steps {
                 parallel(
-                    a: {
-                        echo 'Functinal Test'
+                    Functional: {
+                        echo 'Functional Test'
                     },
-                    b: {
+                    Performance: {
                         echo 'Performance Test'
                     }
                 )
