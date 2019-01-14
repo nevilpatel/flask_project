@@ -5,16 +5,30 @@ pipeline {
         stage('Building') {
             steps {
                 echo 'Building'
+                echo 'Unit Testing'
+                echo 'Docker Build'
             }
         }
-        stage('Test') {
+        stage('Deploy to Stage') {
             steps {
-                echo 'Testing'
+                echo 'Deploying to Stage'
             }
         }
-        stage('Deploy') {
+        stage('Testing') {
             steps {
-                echo 'Deploying'
+                parallel(
+                    a: {
+                        echo 'Functinal Test'
+                    },
+                    b: {
+                        echo 'Performance Test'
+                    }
+                )
+            }
+        }
+        stage('Deliver to Live Site') {
+            steps {
+                echo 'Delivering'
             }
         }
     }
