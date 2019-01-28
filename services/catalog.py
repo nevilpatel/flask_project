@@ -5,8 +5,10 @@ from functools import wraps
 import jwt
 from flask import jsonify, request, Response, json
 
-from models.catalog_model import *
+from models.catalog_model import Catalog
 from models.user_model import User
+from models.vendor_model import Vendor
+from settings import app
 
 
 def token_required(f):
@@ -22,17 +24,27 @@ def token_required(f):
     return wrapper
 
 
-def validate_item(item):
-    if 'name' in item and 'vendor' in item and 'category' in item:
-        return True
-    return False
+def validate_request(request, expected):
+    return set(request) < set(expected)
+
+
+def validate_catalog_request(request):
+    return validate_request(request, ['id', 'name', 'vendor', 'category'])
+
+    # if 'name' in item and 'vendor' in item and 'category' in item:
+    #     return True
+    # return False
+
+
+def validate_vendor_request(request):
+    return validate_request(request, ['id', 'name', 'ranking'])
 
 
 def get_item_id():
     return random.randint(1, 5000)
 
 
-def create_response(message="", status=200, location=""):
+def create_response(message={}, status=200, location=""):
     response = Response(json.dumps(message), status, mimetype='application/json')
     if location:
         response.headers['LOCATION'] = location
@@ -110,7 +122,7 @@ def add_item():
     :return: 201
     """
     request_data = request.get_json()
-    if validate_item(request_data):
+    if validate_catalog_request(request_data):
         item_id = get_item_id()
         Catalog.add_item(item_id, request_data['name'], request_data['vendor'], request_data['category'])
         return resource_added_response('/catalog/' + str(item_id))
@@ -127,7 +139,7 @@ def add_item():
 @token_required
 def replace_item(item_id):
     request_data = request.get_json()
-    if validate_item(request_data):
+    if validate_catalog_request(request_data):
         Catalog.replace_item(item_id, request_data['name'], request_data['vendor'], request_data['category'])
         return replaced_response()
     return resource_not_found_response()
@@ -164,6 +176,47 @@ def get_item(item_id):
     return_value = Catalog.get_item(item_id)
     if len(return_value) > 0:
         return jsonify(return_value)
+    else:
+        return resource_not_found_response()
+
+
+@app.route("/vendor")
+def get_vendors():
+    vendors = Vendor.get_vendors()
+    return jsonify(vendors)
+
+
+@app.route("/vendor", methods=['POST'])
+def add_vendor():
+    request_data = request.get_json()
+    if validate_vendor_request(request_data):
+        id = Vendor.add_vendor(request_data['name'])
+        return resource_added_response('/Vendor/' + str(id))
+    return invalid_request_response()
+
+
+@app.route("/vendor/<int:id>", methods=['DELETE'])
+def remove_vendor(v_id):
+    if Vendor.remove_vendor(id):
+        return deleted_response()
+    else:
+        return resource_not_found_response()
+
+
+@app.route("/vendor/<int:id>", methods=['PUT'])
+def replace_vendor(id):
+    if Vendor.replace_vendor(id):
+        return replaced_response()
+    else:
+        return resource_not_found_response()
+
+
+@app.route("/vendor/<int:id>", methods=['PATCH'])
+def update_vendor_name():
+    request_data = request.get_json()
+    if validate_vendor_request(request_data):
+        Vendor.update_name(id, request_data['name'])
+        return replaced_response()
     else:
         return resource_not_found_response()
 
