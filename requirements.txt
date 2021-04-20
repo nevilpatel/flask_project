@@ -20,7 +20,7 @@ packaging==18.0
 pluggy==0.8.0
 post==2018.11.20
 public==2018.11.20
-py==1.7.0
+py==1.10.0
 Pygments==2.3.1
 pyparsing==2.3.0
 pytest==4.0.2
